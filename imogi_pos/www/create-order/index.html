@@ -1292,6 +1292,20 @@ button:disabled { opacity: .6; cursor: not-allowed; }
 .success-details { color: var(--text-dim); margin: 6px 0 12px; }
 .success-queue   { font-size: 32px; font-weight: 700; margin: 8px 0; }
 .btn-done        { background: var(--brand-primary); color: #fff; border: none; padding: .9rem 1.2rem; border-radius: 12px; }
+.success-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.success-actions .btn,
+.success-actions .btn-done {
+  min-width: 160px;
+}
+.btn-print {
+  font-weight: 600;
+}
 
 /* Receipt (optional) */
 .success-branding {
@@ -1834,7 +1848,8 @@ button:disabled { opacity: .6; cursor: not-allowed; }
       <div>{{ _("Please wait for your number to be called") }}</div>
     </div>
 
-    <div class="mt-8">
+    <div class="success-actions">
+      <button class="btn btn-secondary btn-print" id="btn-success-print">{{ _("Print Receipt") }}</button>
       <button class="btn-done" id="btn-success-done">{{ _("Done") }}</button>
     </div>
   </div>

@@ -531,6 +531,7 @@ frappe.ready(async function () {
       successBranding: document.getElementById("success-branding"),
       successQueueNumber: document.getElementById("success-queue-number"),
       successReceipt: document.getElementById("success-receipt"),
+      successPrintBtn: document.getElementById("btn-success-print"),
       successDoneBtn: document.getElementById("btn-success-done"),
 
       // Loading overlay
@@ -996,6 +997,9 @@ frappe.ready(async function () {
       );
 
       // Success modal
+      this.elements.successPrintBtn?.addEventListener("click", () =>
+        this.handleSuccessPrint()
+      );
       this.elements.successDoneBtn?.addEventListener("click", () => {
         this.closeSuccessModal();
         this.resetApp();
@@ -3974,6 +3978,37 @@ frappe.ready(async function () {
         if (!message?.success) console.error("Error printing queue ticket:", message?.error);
       } catch (err) {
         console.error("Error printing queue ticket:", err);
+      }
+    },
+
+    handleSuccessPrint: async function () {
+      const invoiceName = this.invoiceName || this.paymentRequest?.invoice;
+
+      if (!invoiceName) {
+        frappe.msgprint({
+          title: __("Receipt Not Available"),
+          message: __("No invoice found to print."),
+          indicator: "red",
+        });
+        return;
+      }
+
+      this.showLoading(__("Preparing receipt..."));
+
+      try {
+        await this.printReceipt(invoiceName);
+        if (typeof frappe !== "undefined" && frappe && typeof frappe.show_alert === "function") {
+          frappe.show_alert({ message: __("Receipt sent to printer"), indicator: "green" });
+        }
+      } catch (err) {
+        console.error("Error printing receipt from success modal:", err);
+        frappe.msgprint({
+          title: __("Print Failed"),
+          message: __("Unable to print receipt. Please try again."),
+          indicator: "red",
+        });
+      } finally {
+        this.hideLoading();
       }
     },
 
