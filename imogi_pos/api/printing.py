@@ -175,11 +175,22 @@ def get_print_format_html(doc, print_format_name=None):
     # Get the Print Format
     print_format = frappe.get_doc("Print Format", print_format_name)
     
-    # Always use frappe.get_print to let Frappe handle both classic and builder
-    # print formats correctly. Directly rendering ``format_data`` would fail for
-    # JSON-based print formats (builder templates) resulting in ``Can't compile
-    # non template nodes`` errors.
-    return frappe.get_print(doc.doctype, doc.name, print_format=print_format_name)
+    try:
+        # Always use frappe.get_print to let Frappe handle both classic and
+        # builder print formats correctly. Directly rendering ``format_data``
+        # would fail for JSON-based print formats (builder templates)
+        # resulting in ``Can't compile non template nodes`` errors.
+        return frappe.get_print(doc.doctype, doc.name, print_format=print_format_name)
+    except Exception:
+        # Some builder print formats can still fail to render if their
+        # configuration is incomplete. Fall back to the document's default
+        # print format so the print flow continues instead of aborting.
+        frappe.log_error(
+            title="IMOGI Print Format Fallback",
+            message=f"Falling back to default format for {doc.doctype} {doc.name} (requested format: {print_format_name})",
+        )
+
+        return frappe.get_print(doc.doctype, doc.name)
 
 @frappe.whitelist()
 def print_kot(kot_ticket, kitchen_station=None, copies=1, reprint=False, print_format=None):
