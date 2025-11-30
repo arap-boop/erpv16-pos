@@ -3981,6 +3981,77 @@ frappe.ready(async function () {
       }
     },
 
+    openReceiptPrintDialog: function () {
+      const receiptEl = this.elements.successReceipt;
+      if (!receiptEl || !receiptEl.innerHTML.trim()) {
+        throw new Error("Receipt content is not ready for printing.");
+      }
+
+      const styles = Array.from(
+        document.querySelectorAll('style, link[rel="stylesheet"]')
+      )
+        .map((node) => node.outerHTML)
+        .join("\n");
+
+      const brandingHtml =
+        this.elements.successBranding &&
+        !this.elements.successBranding.classList.contains("hidden")
+          ? this.elements.successBranding.innerHTML
+          : "";
+
+      const printWindow = window.open(
+        "",
+        "_blank",
+        "noopener,noreferrer,width=900,height=1200"
+      );
+
+      if (!printWindow) {
+        throw new Error("Print preview was blocked by the browser.");
+      }
+
+      printWindow.document.write(`
+        <!doctype html>
+        <html>
+          <head>
+            <title>${__("Receipt")}</title>
+            ${styles}
+            <style>
+              body { background: #f3f4f6; padding: 24px; }
+              .success-modal { display: block !important; }
+              .success-receipt { margin: 0 auto; }
+              .success-receipt-card { box-shadow: none; border: 1px solid #e5e7eb; }
+              @media print { body { background: white; } }
+            </style>
+          </head>
+          <body>
+            ${
+              brandingHtml
+                ? `<div class="success-branding">${brandingHtml}</div>`
+                : ""
+            }
+            <div class="success-receipt">${receiptEl.innerHTML}</div>
+          </body>
+        </html>
+      `);
+
+      printWindow.document.close();
+      printWindow.focus();
+
+      const triggerPrint = () => {
+        try {
+          printWindow.print();
+        } catch (error) {
+          console.error("Failed to open print dialog:", error);
+        }
+      };
+
+      if (printWindow.document.readyState === "complete") {
+        triggerPrint();
+      } else {
+        printWindow.addEventListener("load", triggerPrint, { once: true });
+      }
+    },
+
     handleSuccessPrint: async function () {
       const invoiceName = this.invoiceName || this.paymentRequest?.invoice;
 
@@ -3996,10 +4067,8 @@ frappe.ready(async function () {
       this.showLoading(__("Preparing receipt..."));
 
       try {
-        await this.printReceipt(invoiceName);
-        if (typeof frappe !== "undefined" && frappe && typeof frappe.show_alert === "function") {
-          frappe.show_alert({ message: __("Receipt sent to printer"), indicator: "green" });
-        }
+        await this.renderSuccessReceipt();
+        this.openReceiptPrintDialog();
       } catch (err) {
         console.error("Error printing receipt from success modal:", err);
         frappe.msgprint({
