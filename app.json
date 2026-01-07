@@ -7,5 +7,5 @@
   "app_license": "MIT",
   "app_requires": ["erpnext"],
   "hide_in_installer": 0,
-  "developer_mode": 0
+  "developer_mode": 1
 }
