@@ -1,6 +1,1 @@
-# Core dependencies
-frappe>=15.0.0
-erpnext>=15.0.0
-
-# Note: Xendit integration is provided by a separate app
-# Install the IMOGI Xendit Connect app for payment gateway features
+# Core dependencies (frappe/erpnext) are managed by bench via pyproject.toml

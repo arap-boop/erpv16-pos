@@ -5,7 +5,7 @@ from frappe import _
 app_name = "imogi_pos"
 app_title = "IMOGI POS"
 app_publisher = "IMOGI"
-app_description = "A modular and scalable restaurant POS solution for ERPNext v15"
+app_description = "A modular and scalable restaurant POS solution for ERPNext v16"
 app_icon = "octicon octicon-file-directory"
 app_color = "#4287f5"
 app_email = "support@imogi.com"
